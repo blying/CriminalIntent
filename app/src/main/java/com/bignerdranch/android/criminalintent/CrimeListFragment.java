@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -34,9 +34,20 @@ public class CrimeListFragment extends Fragment {
     private void updateUI(){
         CrimeLab crimeLab=CrimeLab.get(getActivity());//单例类
         List<Crime> crimes=crimeLab.getCrimes();//将单例类里的数据获取出来 赋值个list
-        mAdapter=new CrimeAdapter(crimes);//实例化adapter
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if (mAdapter==null){
+            mAdapter=new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }else {
+            mAdapter.notifyDataSetChanged();
+        }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mTitleTextView;
         private TextView mDateTextView;
@@ -59,7 +70,8 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(),mCrime.getTitle()+"checked!",Toast.LENGTH_SHORT).show();
+            Intent intent=CrimeActivity.newIntent(getActivity(),mCrime.getID());
+            startActivity(intent);
         }
     }
     private class  CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
